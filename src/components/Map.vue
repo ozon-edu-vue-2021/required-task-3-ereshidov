@@ -13,9 +13,6 @@
 <script>
 import * as d3 from "d3";
 
-import tables from "../assets/data/tables.json";
-import legend from '../assets/data/legend.json';
-
 import MapSVG from "../assets/images/map.svg";
 import TableSVG from "../assets/images/workPlace.svg";
 
@@ -24,11 +21,20 @@ export default {
     MapSVG,
     TableSVG,
   },
+  props: {
+    tables: {
+      type: Array,
+      default: () => [],
+    },
+    legend: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       tableSvg: null,
       isLoading: false,
-      tables: null,
       svg: null,
       g: null,
     };
@@ -37,8 +43,6 @@ export default {
     this.svg = d3.select(this.$refs.svg);
     this.g = this.svg.select("g");
     this.tableSvg = d3.select(this.$refs.table);
-
-    this.tables = tables;
 
     if (this.g) {
       this.drawTables();
@@ -49,7 +53,7 @@ export default {
   methods: {
     drawTables() {
       const svgTablesGroup = this.g.append("g").classed("groupPlaces", true);
-      this.tables.map((table) => {
+      this.$props.tables.map((table) => {
         const svgTable = svgTablesGroup
           .append("g")
           .attr("transform", `translate(${table.x}, ${table.y}) scale(0.5)`)
@@ -64,10 +68,12 @@ export default {
       });
     },
     findTableColor(tableGroupId) {
-        const table = legend.find((subDivision) => subDivision.group_id === tableGroupId);
+      const table = this.$props.legend.find(
+        (subDivision) => subDivision.group_id === tableGroupId
+      );
 
-        return table?.color ?? 'transparent';
-    }
+      return table?.color ?? "transparent";
+    },
   },
 };
 </script>

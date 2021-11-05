@@ -50,7 +50,6 @@ import { Doughnut } from "vue-chartjs";
 
 import LegendItem from "./SideMenu/LegendItem.vue";
 import PersonCard from "./SideMenu/PersonCard.vue";
-import legend from "@/assets/data/legend.json";
 
 export default {
   props: {
@@ -62,6 +61,10 @@ export default {
       type: Object,
       default: null,
     },
+    legend: {
+      type: Array,
+      default: () => [],
+    },
   },
   components: {
     LegendItem,
@@ -69,39 +72,30 @@ export default {
     Draggable,
     Doughnut,
   },
-  data() {
-    return {
-      legend: [],
-    };
-  },
-  created() {
-    this.loadLegend();
-  },
   mounted() {
     this.makeChart();
   },
   methods: {
-    loadLegend() {
-      this.legend = legend;
-    },
     closeProfile() {
       this.$emit("update:isUserOpenned", false);
     },
     makeChart() {
+      const { legend } = this.$props;
+
       const chartData = {
-        labels: this.legend.map(({ text }) => text),
+        labels: legend.map(({ text }) => text),
         datasets: [
           {
             label: "Legend",
-            backgroundColor: this.legend.map(({ color }) => color),
-            data: this.legend.map(({ counter }) => counter),
-           },
+            backgroundColor: legend.map(({ color }) => color),
+            data: legend.map(({ counter }) => counter),
+          },
         ],
       };
       const options = {
-          legend: {
-              display: false
-          } 
+        legend: {
+          display: false,
+        },
       };
       this.$refs.pie.renderChart(chartData, options);
     },

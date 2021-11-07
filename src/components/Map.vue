@@ -3,23 +3,33 @@
     <h3>Карта офиса</h3>
 
     <div v-if="!isLoading" class="map-root">
-      <MapSVG ref="svg" />
-      <TableSVG v-show="false" ref="table" />
+      <MapSVG ref="svg">
+        <g v-click-outside="hide">
+          <Table
+            @onTableClick="handleClick"
+            v-for="(table, i) in tables"
+            :key="i"
+            :table="table"
+            :legend="legend"
+          />
+        </g>
+      </MapSVG>
     </div>
     <div v-else>Loading...</div>
   </div>
 </template>
 
 <script>
-import * as d3 from "d3";
-
 import MapSVG from "../assets/images/map.svg";
-import TableSVG from "../assets/images/workPlace.svg";
+import Table from "./Table.vue";
+
+import peoples from "../assets/data/people.json";
+import ClickOutside from "vue-click-outside";
 
 export default {
   components: {
     MapSVG,
-    TableSVG,
+    Table,
   },
   props: {
     tables: {
@@ -30,50 +40,32 @@ export default {
       type: Array,
       default: () => [],
     },
+    person: Object,
+    isUserOpened: Boolean,
   },
   data() {
     return {
-      tableSvg: null,
       isLoading: false,
-      svg: null,
-      g: null,
     };
   },
-  mounted() {
-    this.svg = d3.select(this.$refs.svg);
-    this.g = this.svg.select("g");
-    this.tableSvg = d3.select(this.$refs.table);
-
-    if (this.g) {
-      this.drawTables();
-    } else {
-      console.error("Error happen while drawing tables");
-    }
-  },
   methods: {
-    drawTables() {
-      const svgTablesGroup = this.g.append("g").classed("groupPlaces", true);
-      this.$props.tables.map((table) => {
-        const svgTable = svgTablesGroup
-          .append("g")
-          .attr("transform", `translate(${table.x}, ${table.y}) scale(0.5)`)
-          .attr("id", table._id)
-          .classed("employer-place", true);
-
-        svgTable
-          .append("g")
-          .attr("transform", `rotate(${table.rotate || 0})`)
-          .html(this.tableSvg.html())
-          .attr("fill", this.findTableColor(table.group_id));
-      });
+    hide() {
+      this.$emit("update:isUserOpened", false);
     },
-    findTableColor(tableGroupId) {
-      const table = this.$props.legend.find(
-        (subDivision) => subDivision.group_id === tableGroupId
+    handleClick(event) {
+      this.$emit("update:isUserOpened", true);
+      const tableId = event.currentTarget.getAttribute("id");
+
+      const person = peoples.find(
+        (people) => people.tableId === Number(tableId)
       );
-
-      return table?.color ?? "transparent";
+      if (person) {
+        this.$emit("update:person", person);
+      }
     },
+  },
+  directives: {
+    ClickOutside,
   },
 };
 </script>

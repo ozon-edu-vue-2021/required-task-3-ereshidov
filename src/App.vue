@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <div class="office">
-      <Map :legend="legend" :tables="tables" />
-      <SideMenu :legend="legend" />
+      <Map :person.sync="person" :isUserOpened.sync="isUserOpened" :legend="legend" :tables="tables" />
+      <SideMenu :person="person" :isUserOpenned="isUserOpened" :legend.sync="legend" />
     </div>
   </div>
 </template>
@@ -22,6 +22,8 @@ export default {
     return {
       tables: [],
       legend: [],
+      isUserOpened: false,
+      person: null,
     };
   },
   created() {

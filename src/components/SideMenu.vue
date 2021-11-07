@@ -18,9 +18,9 @@
       <div v-if="!isUserOpenned" class="legend">
         <div class="legend__data">
           <div v-if="legend.length > 0" class="legend__items">
-            <Draggable>
+            <Draggable v-model="currentLegend">
               <LegendItem
-                v-for="(item, index) in legend"
+                v-for="(item, index) in currentLegend"
                 :key="index"
                 :color="item.color"
                 :text="item.text"
@@ -72,15 +72,25 @@ export default {
     Draggable,
     Doughnut,
   },
+  data() {
+    return {
+      currentLegend: [],
+    };
+  },
   mounted() {
+    this.currentLegend = Array.from(this.$props.legend);
     this.makeChart();
+  },
+  updated() {
+    this.makeChart();
+    this.$emit('update:legend', this.currentLegend);
   },
   methods: {
     closeProfile() {
       this.$emit("update:isUserOpenned", false);
     },
     makeChart() {
-      const { legend } = this.$props;
+      const { legend } = this;
 
       const chartData = {
         labels: legend.map(({ text }) => text),
@@ -97,7 +107,7 @@ export default {
           display: false,
         },
       };
-      this.$refs.pie.renderChart(chartData, options);
+      this.$refs?.pie?.renderChart(chartData, options);
     },
   },
 };
